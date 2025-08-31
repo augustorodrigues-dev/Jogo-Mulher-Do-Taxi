@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
-public class AnimaçãoPlayer : MonoBehaviour
+public class MovimentoPlayer : MonoBehaviour
 {
     public Camera playerCamera;
     public float walkSpeed = 6f;
@@ -31,6 +31,10 @@ public class AnimaçãoPlayer : MonoBehaviour
 
     void Update()
     {
+        if (GerenciadorDePause.estaPausado)
+    {
+        return; // 'return' para a execução da função Update neste frame
+    }
         Vector3 forward = transform.TransformDirection(Vector3.forward);
         Vector3 right = transform.TransformDirection(Vector3.right);
 

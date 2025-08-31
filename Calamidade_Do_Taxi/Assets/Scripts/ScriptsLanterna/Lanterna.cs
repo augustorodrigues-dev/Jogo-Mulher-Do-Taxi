@@ -1,35 +1,40 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+
 public class Lanterna : MonoBehaviour
 {
-
     public GameObject ON;
     public GameObject OFF;
+    
+    public AudioSource SomLanterna; 
     private bool isON;
-
 
     void Start()
     {
+        
         ON.SetActive(false);
         OFF.SetActive(true);
         isON = false;
     }
-    void Update(){
+
+    void Update()
+    {
+        
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
-            if (isON)
+            
+            isON = !isON; 
+            
+            
+            if (SomLanterna != null)
             {
-                ON.SetActive(false);
-                OFF.SetActive(true);
+                SomLanterna.Play();
             }
 
-            if (!isON)
-            {
-                ON.SetActive(true);
-                OFF.SetActive(false);
-            }
-            isON = !isON;
+            
+            ON.SetActive(isON);
+            OFF.SetActive(!isON);
         }
     }
 }

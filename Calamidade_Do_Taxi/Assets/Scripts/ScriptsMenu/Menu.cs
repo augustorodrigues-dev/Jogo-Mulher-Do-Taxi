@@ -1,11 +1,12 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 public class Menu : MonoBehaviour
 {
 
-    public GameObject textosMenu;
+    public GameObject gameObjectsAparecer;
 
-    public GameObject textosOpcoes;
+    public GameObject gameObjectsSumir;
     public void botaoNovoJogo()
     {
         SceneManager.LoadScene("Casa Inicial");
@@ -15,15 +16,9 @@ public class Menu : MonoBehaviour
         Application.Quit();
     }
 
-    public void botaoOpcoes()
+    public void botaoTrocar()
     {
-        textosMenu.SetActive(false);
-        textosOpcoes.SetActive(true);
-    }
-
-    public void botaoVoltar()
-    {
-        textosMenu.SetActive(true);
-        textosOpcoes.SetActive(false);
+        gameObjectsAparecer.SetActive(true);
+        gameObjectsSumir.SetActive(false);
     }
 }

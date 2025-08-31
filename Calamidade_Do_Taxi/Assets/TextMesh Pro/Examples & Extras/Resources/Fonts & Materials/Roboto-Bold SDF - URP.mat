@@ -123,11 +123,11 @@ Material:
     - _FaceColor: {r: 1, g: 1, b: 1, a: 1}
     - _FaceUVSpeed: {r: 0, g: 0, b: 0, a: 0}
     - _GlowColor: {r: 0, g: 0.3793165, b: 1, a: 0.5}
-    - _IsoPerimeter: {r: 0, g: 0, b: 0, a: 0}
+    - _IsoPerimeter: {r: -0.36, g: 0, b: 0, a: 0}
     - _MaskCoord: {r: 0, g: 0, b: 32767, a: 32767}
     - _OutlineColor: {r: 0, g: 0, b: 0, a: 1}
     - _OutlineColor1: {r: 0, g: 0, b: 0, a: 1}
-    - _OutlineColor2: {r: 0, g: 0, b: 0, a: 0}
+    - _OutlineColor2: {r: 888.7547, g: 628.01575, b: 79.65252, a: 0}
     - _OutlineColor3: {r: 0, g: 0, b: 0, a: 0}
     - _OutlineOffset1: {r: 0, g: 0, b: 0, a: 0}
     - _OutlineOffset2: {r: 0, g: 0, b: 0, a: 0}
