@@ -11,14 +11,14 @@ public class InteracaoGavetaCutscene : MonoBehaviour
     [Tooltip("Ponto exato para onde a câmera deve olhar.")]
     public Transform lookAtAlvo;
 
-    // PASSO 2: Trocamos a variável única por uma lista de scripts
+    
     [Tooltip("Arraste aqui TODOS os scripts do jogador que devem ser desativados durante a cutscene.")]
     public List<MonoBehaviour> scriptsParaDesativar; 
 
     [Tooltip("A câmera principal do jogador.")]
     public Camera playerCamera;
 
-    // Adicione esta linha junto com as outras variáveis de "Configuração da Cutscene"
+    
     [Tooltip("Ponto secundário para onde a câmera deve olhar após a ação principal.")]
     public Transform lookAtAlvoSecundario;
 
@@ -34,7 +34,11 @@ public class InteracaoGavetaCutscene : MonoBehaviour
     public float velocidadeRotacao = 3f;
     public float velocidadeGaveta = 5f;
 
+    public List<GameObject> objetosCutscene;
+
     public GameObject painel;
+
+    //public GameObject painelCutscene;
 
     private bool jogadorPerto = false;
     private bool emCutscene = false;
@@ -62,8 +66,12 @@ public class InteracaoGavetaCutscene : MonoBehaviour
     {
         if (jogadorPerto && Input.GetKeyDown(KeyCode.E) && !emCutscene)
         {
-            painel.SetActive(false);
+            painel.SetActive(false); 
             StartCoroutine(ExecutarCutscene());
+            foreach (GameObject objetos in objetosCutscene) {
+                objetos.SetActive(true);
+            }
+            // painelCutscene.SetActive(true);
         }
     }
 
@@ -135,6 +143,9 @@ private IEnumerator ExecutarCutscene()
     foreach (var script in scriptsParaDesativar)
     {
         script.enabled = true;
+    }
+    foreach (GameObject objetos in objetosCutscene) {
+        objetos.SetActive(false);
     }
     emCutscene = false;
     }
