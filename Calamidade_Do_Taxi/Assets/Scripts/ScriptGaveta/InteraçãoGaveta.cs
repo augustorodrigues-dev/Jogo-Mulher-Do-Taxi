@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Collections;
-using System.Collections.Generic; // PASSO 1: Adicionado para usar Listas
+using System.Collections.Generic; 
 
 public class InteracaoGavetaCutscene : MonoBehaviour
 {
@@ -34,7 +34,7 @@ public class InteracaoGavetaCutscene : MonoBehaviour
     public float velocidadeRotacao = 3f;
     public float velocidadeGaveta = 5f;
 
-    public List<GameObject> objetosCutscene;
+    public List<GameObject> objetosCutscene = new List<GameObject>();
 
     public GameObject painel;
 
