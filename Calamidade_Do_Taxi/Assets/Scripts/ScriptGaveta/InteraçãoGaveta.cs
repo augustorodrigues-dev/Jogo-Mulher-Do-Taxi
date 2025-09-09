@@ -44,6 +44,8 @@ public class InteracaoGavetaCutscene : MonoBehaviour
     private bool emCutscene = false;
     private GameObject playerObject;
 
+    public GameObject mulherDoTaxi;
+
 
     private void OnTriggerEnter(Collider other)
     {
@@ -126,7 +128,6 @@ private IEnumerator ExecutarCutscene()
         }
     }
 
-    
     MovimentoPlayer playerScript = playerObject.GetComponent<MovimentoPlayer>(); 
 
     if (playerScript != null)
@@ -135,7 +136,11 @@ private IEnumerator ExecutarCutscene()
         playerObject.transform.rotation = Quaternion.Euler(0, finalWorldRotation.eulerAngles.y, 0);
 
         float finalRotationX = finalWorldRotation.eulerAngles.x;
-        if (finalRotationX > 180) { finalRotationX -= 360; }
+            if (finalRotationX > 180)
+            {
+
+                finalRotationX -= 360;
+            }
         
         playerScript.rotationX = finalRotationX;
     }
@@ -147,6 +152,7 @@ private IEnumerator ExecutarCutscene()
     foreach (GameObject objetos in objetosCutscene) {
         objetos.SetActive(false);
     }
+    mulherDoTaxi.SetActive(true);
     emCutscene = false;
     }
 }
