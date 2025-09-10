@@ -4,6 +4,22 @@ using System.Collections.Generic;
 
 public class InteracaoGavetaCutscene : MonoBehaviour
 {
+
+    public bool gavetaFoiAberta = false;
+
+    private Vector3 posicaoFechada; // salva a posição inicial
+
+
+    [Header("Configuração de Som")]
+    [Tooltip("O componente AudioSource que vai tocar o som.")]
+    public AudioSource somGavetaSource;
+
+    [Tooltip("O arquivo de som (AudioClip) de abrindo a gaveta.")]
+    public AudioClip somAbrindoGavetaJogador;
+
+    public AudioSource somAbrindoGavetaSource;
+
+    public AudioClip somGaveta;
     [Header("Configuração da Cutscene")]
     [Tooltip("Ponto exato para onde o jogador deve se mover.")]
     public Transform pontoAlvoPlayer;
@@ -64,6 +80,11 @@ public class InteracaoGavetaCutscene : MonoBehaviour
         }
     }
 
+    void Start()
+    {
+        posicaoFechada = gavetaTransform.position; // considera a posição inicial como fechada
+    }
+
     void Update()
     {
         if (jogadorPerto && Input.GetKeyDown(KeyCode.E) && !emCutscene)
@@ -77,82 +98,105 @@ public class InteracaoGavetaCutscene : MonoBehaviour
         }
     }
 
-    
 
-private IEnumerator ExecutarCutscene()
-{
-    emCutscene = true;
-    
-    
-    foreach (var script in scriptsParaDesativar)
+
+    private IEnumerator ExecutarCutscene()
     {
-        script.enabled = false;
-    }
+        emCutscene = true;
 
-    
-    while (Vector3.Distance(playerObject.transform.position, pontoAlvoPlayer.position) > 0.01f)
-    {
-        playerObject.transform.position = Vector3.MoveTowards(playerObject.transform.position, pontoAlvoPlayer.position, velocidadeMovimento * Time.deltaTime);
-        yield return null;
-    }
 
-    
-    Quaternion targetRotationGaveta = Quaternion.LookRotation(lookAtAlvo.position - playerCamera.transform.position);
-    while (Quaternion.Angle(playerCamera.transform.rotation, targetRotationGaveta) > 0.1f)
-    {
-        playerCamera.transform.rotation = Quaternion.Slerp(playerCamera.transform.rotation, targetRotationGaveta, velocidadeRotacao * Time.deltaTime);
-        yield return null;
-    }
-
-    Vector3 posicaoFechada = gavetaTransform.position;
-    Vector3 posicaoAberta = posicaoFechada + gavetaTransform.right * distanciaParaAbrir;
-    float tempo = 0;
-    while (tempo < 1)
-    {
-        gavetaTransform.position = Vector3.Lerp(posicaoFechada, posicaoAberta, tempo);
-        tempo += Time.deltaTime * velocidadeGaveta;
-        yield return null;
-    }
-    gavetaTransform.position = posicaoAberta;
-
-    
-    yield return new WaitForSeconds(1.5f);
-
-    if (lookAtAlvoSecundario != null) 
-    {
-        Quaternion targetRotationSecundaria = Quaternion.LookRotation(lookAtAlvoSecundario.position - playerCamera.transform.position);
-        while (Quaternion.Angle(playerCamera.transform.rotation, targetRotationSecundaria) > 0.1f)
+        foreach (var script in scriptsParaDesativar)
         {
-            playerCamera.transform.rotation = Quaternion.Slerp(playerCamera.transform.rotation, targetRotationSecundaria, velocidadeRotacao * Time.deltaTime);
+            script.enabled = false;
+        }
+
+
+        while (Vector3.Distance(playerObject.transform.position, pontoAlvoPlayer.position) > 0.01f)
+        {
+            playerObject.transform.position = Vector3.MoveTowards(playerObject.transform.position, pontoAlvoPlayer.position, velocidadeMovimento * Time.deltaTime);
             yield return null;
         }
-    }
 
-    MovimentoPlayer playerScript = playerObject.GetComponent<MovimentoPlayer>(); 
 
-    if (playerScript != null)
-    {
-        Quaternion finalWorldRotation = playerCamera.transform.rotation;
-        playerObject.transform.rotation = Quaternion.Euler(0, finalWorldRotation.eulerAngles.y, 0);
 
-        float finalRotationX = finalWorldRotation.eulerAngles.x;
+
+        Quaternion targetRotationGaveta = Quaternion.LookRotation(lookAtAlvo.position - playerCamera.transform.position);
+        while (Quaternion.Angle(playerCamera.transform.rotation, targetRotationGaveta) > 0.1f)
+        {
+            playerCamera.transform.rotation = Quaternion.Slerp(playerCamera.transform.rotation, targetRotationGaveta, velocidadeRotacao * Time.deltaTime);
+            yield return null;
+        }
+
+
+        if (somGavetaSource != null && somGaveta != null)
+        {
+            somGavetaSource.clip = somGaveta;
+            somGavetaSource.loop = false;
+            somGavetaSource.volume = 0.5f; // ajusta o volume aqui
+            somGavetaSource.Play();
+        }
+
+
+        Vector3 posicaoFechada = gavetaTransform.position;
+        Vector3 posicaoAberta = posicaoFechada + gavetaTransform.right * distanciaParaAbrir;
+        float tempo = 0;
+
+        while (tempo < 1)
+        {
+            gavetaTransform.position = Vector3.Lerp(posicaoFechada, posicaoAberta, tempo);
+            tempo += Time.deltaTime * velocidadeGaveta;
+            yield return null;
+        }
+
+        gavetaTransform.position = posicaoAberta;
+
+        if (somAbrindoGavetaSource != null && somAbrindoGavetaJogador != null)
+        {
+            somAbrindoGavetaSource.clip = somAbrindoGavetaJogador;
+            somAbrindoGavetaSource.loop = false;
+            somAbrindoGavetaSource.Play();
+        }
+
+        // A "pausa dramática" que você mencionou
+        yield return new WaitForSeconds(4f);
+
+        if (lookAtAlvoSecundario != null)
+        {
+            Quaternion targetRotationSecundaria = Quaternion.LookRotation(lookAtAlvoSecundario.position - playerCamera.transform.position);
+            while (Quaternion.Angle(playerCamera.transform.rotation, targetRotationSecundaria) > 0.1f)
+            {
+                playerCamera.transform.rotation = Quaternion.Slerp(playerCamera.transform.rotation, targetRotationSecundaria, velocidadeRotacao * Time.deltaTime);
+                yield return null;
+            }
+        }
+
+        MovimentoPlayer playerScript = playerObject.GetComponent<MovimentoPlayer>();
+
+        if (playerScript != null)
+        {
+            Quaternion finalWorldRotation = playerCamera.transform.rotation;
+            playerObject.transform.rotation = Quaternion.Euler(0, finalWorldRotation.eulerAngles.y, 0);
+
+            float finalRotationX = finalWorldRotation.eulerAngles.x;
             if (finalRotationX > 180)
             {
 
                 finalRotationX -= 360;
             }
-        
-        playerScript.rotationX = finalRotationX;
-    }
-    
-    foreach (var script in scriptsParaDesativar)
-    {
-        script.enabled = true;
-    }
-    foreach (GameObject objetos in objetosCutscene) {
-        objetos.SetActive(false);
-    }
-    mulherDoTaxi.SetActive(true);
-    emCutscene = false;
+
+            playerScript.rotationX = finalRotationX;
+        }
+
+        foreach (var script in scriptsParaDesativar)
+        {
+            script.enabled = true;
+        }
+        foreach (GameObject objetos in objetosCutscene)
+        {
+            objetos.SetActive(false);
+        }
+        mulherDoTaxi.SetActive(true);
+        emCutscene = false;
+        gavetaFoiAberta = true;
     }
 }

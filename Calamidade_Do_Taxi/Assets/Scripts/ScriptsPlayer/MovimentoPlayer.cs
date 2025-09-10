@@ -5,6 +5,7 @@ using UnityEngine;
 [RequireComponent(typeof(CharacterController))]
 public class MovimentoPlayer : MonoBehaviour 
 {
+    public bool desativarPassos = false;
     [Header("Referências")]
     public Camera playerCamera;
     [SerializeField] private AudioSource somPassosSource; 
@@ -65,7 +66,7 @@ public class MovimentoPlayer : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.LeftControl))
     {
-        // Inverte o estado atual: se está agachado, levanta; se está em pé, agacha.
+        
         isCrouching = !isCrouching;
     }
         
@@ -127,35 +128,40 @@ public class MovimentoPlayer : MonoBehaviour
 
     
     private void HandlePassos(bool running, bool crouching)
+{
+    if (desativarPassos)
     {
-        if (characterController.isGrounded && characterController.velocity.magnitude > 0.2f && (Input.GetAxis("Vertical") != 0 || Input.GetAxis("Horizontal") != 0))
+        somPassosSource.Stop();
+        return;
+    }
+
+    if (characterController.isGrounded && characterController.velocity.magnitude > 0.2f && (Input.GetAxis("Vertical") != 0 || Input.GetAxis("Horizontal") != 0))
+    {
+        AudioClip clipAtual = somAndando;
+        float pitchAtual = pitchAndando;
+
+        if (running && !crouching)
         {
-            AudioClip clipAtual = somAndando;
-            float pitchAtual = pitchAndando;
-
-            if (running && !crouching)
-            {
-                clipAtual = somCorrendo;
-                pitchAtual = pitchCorrendo;
-            }
-            else if (crouching)
-            {
-                clipAtual = somAgachado;
-                pitchAtual = pitchAgachado;
-            }
-
-           
-            if (somPassosSource.clip != clipAtual || !somPassosSource.isPlaying)
-            {
-                somPassosSource.clip = clipAtual;
-                somPassosSource.pitch = pitchAtual;
-                somPassosSource.Play();
-            }
+            clipAtual = somCorrendo;
+            pitchAtual = pitchCorrendo;
         }
-        else
+        else if (crouching)
         {
-            
-            somPassosSource.Stop();
+            clipAtual = somAgachado;
+            pitchAtual = pitchAgachado;
+        }
+
+        if (somPassosSource.clip != clipAtual || !somPassosSource.isPlaying)
+        {
+            somPassosSource.clip = clipAtual;
+            somPassosSource.pitch = pitchAtual;
+            somPassosSource.Play();
         }
     }
+    else
+    {
+        somPassosSource.Stop();
+    }
+}
+
 }
