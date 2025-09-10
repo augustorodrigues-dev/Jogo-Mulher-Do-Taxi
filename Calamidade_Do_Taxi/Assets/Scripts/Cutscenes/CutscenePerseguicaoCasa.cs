@@ -12,20 +12,20 @@ public class CutscenePerseguicao : MonoBehaviour
     [Header("Player")]
     public GameObject playerObject;
     public Camera playerCamera;
-    public List<MonoBehaviour> scriptsParaDesativar; // scripts que controlam o player
+    public List<MonoBehaviour> scriptsParaDesativar; 
 
     [Header("Cutscene Trigger")]
     public Collider triggerCutscene;
 
     [Header("Mulher da Cena")]
     public Transform mulherTransform;
-    public Animator mulherAnimator; // se tiver animações
+    public Animator mulherAnimator; 
     public float velocidadeGiroMulher = 1f;
     public float velocidadeAvancoMulher = 6f;
 
     [Header("Cutscene Config")]
-    public Transform pontoFrentePlayer; // ponto até onde o player anda
-    public Transform direcaoMulher; // onde o player vai olhar (posição da mulher)
+    public Transform pontoFrentePlayer; 
+    public Transform direcaoMulher; 
     public float velocidadeMovimentoPlayer = 2f;
     public float velocidadeRotacaoCamera = 2f;
 
@@ -40,7 +40,7 @@ public class CutscenePerseguicao : MonoBehaviour
     public AudioClip efeitoSusto;
 
     [Header("Collider de Morte")]
-    public GameObject colliderMortePrefab; // prefab com collider + script de morte
+    public GameObject colliderMortePrefab; 
     private GameObject colliderMorteInstance;
 
     private bool cutsceneAtiva = false;
@@ -56,7 +56,7 @@ public class CutscenePerseguicao : MonoBehaviour
 
     private IEnumerator ExecutarCutscene()
     {
-        // Desativar controles do player
+        
         foreach (var script in scriptsParaDesativar)
             script.enabled = false;
 
@@ -65,7 +65,7 @@ public class CutscenePerseguicao : MonoBehaviour
             movimentoPlayer.desativarPassos = true;
         }
 
-        // Player anda para frente
+        
         while (Vector3.Distance(playerObject.transform.position, pontoFrentePlayer.position) > 0.05f)
         {
             playerObject.transform.position = Vector3.MoveTowards(
@@ -76,7 +76,7 @@ public class CutscenePerseguicao : MonoBehaviour
             yield return null;
         }
 
-        // Player olha para a mulher
+        
         Quaternion targetRotation = Quaternion.LookRotation(direcaoMulher.position - playerCamera.transform.position);
         while (Quaternion.Angle(playerCamera.transform.rotation, targetRotation) > 0.5f)
         {
@@ -88,12 +88,12 @@ public class CutscenePerseguicao : MonoBehaviour
             yield return null;
         }
 
-        // Tocar som de olhar
+
         if (somOlhar != null) audioSource.PlayOneShot(somOlhar);
 
         yield return new WaitForSeconds(1.5f);
 
-        // Mulher se vira devagar
+        
         Quaternion mulherTargetRot = Quaternion.LookRotation(playerObject.transform.position - mulherTransform.position);
         while (Quaternion.Angle(mulherTransform.rotation, mulherTargetRot) > 1f)
         {
@@ -105,17 +105,17 @@ public class CutscenePerseguicao : MonoBehaviour
             yield return null;
         }
 
-        // Luzes piscam
+        
         StartCoroutine(PiscarLuzes());
 
         yield return new WaitForSeconds(1f);
 
-        // Mulher avança na direção da câmera (jumpscare)
+       
         if (somGrito != null) audioSource.PlayOneShot(somGrito);
         if (efeitoSusto != null) audioSource.PlayOneShot(efeitoSusto);
 
         Vector3 alvoCamera = playerCamera.transform.position + playerCamera.transform.forward * 2.0f;
-        alvoCamera.y = mulherTransform.position.y; // mantém no nível da mulher (chão)
+        alvoCamera.y = mulherTransform.position.y; 
         while (Vector3.Distance(mulherTransform.position, alvoCamera) > 0.1f)
         {
             mulherTransform.position = Vector3.MoveTowards(
@@ -128,7 +128,7 @@ public class CutscenePerseguicao : MonoBehaviour
 
         yield return new WaitForSeconds(1f);
 
-        // Player cai no chão (simulação de rotação da câmera)
+        
         Quaternion rotacaoChao = Quaternion.Euler(70, playerCamera.transform.rotation.eulerAngles.y, 0);
         float t = 0;
         while (t < 1)
@@ -144,7 +144,7 @@ public class CutscenePerseguicao : MonoBehaviour
 
         yield return new WaitForSeconds(1f);
 
-        // Player levanta novamente
+       
         Quaternion rotacaoLevantado = Quaternion.Euler(0, playerCamera.transform.rotation.eulerAngles.y, 0);
         t = 0;
         while (t < 1)
@@ -158,7 +158,7 @@ public class CutscenePerseguicao : MonoBehaviour
             yield return null;
         }
 
-        // Reativar controles do player
+        
         foreach (var script in scriptsParaDesativar)
             script.enabled = true;
 
@@ -167,7 +167,7 @@ public class CutscenePerseguicao : MonoBehaviour
         movimentoPlayer.desativarPassos = false;
 }
 
-        // Criar collider de morte na frente da mulher
+        
         //colliderMorteInstance = Instantiate(colliderMortePrefab, mulherTransform.position, mulherTransform.rotation);
         //colliderMorteInstance.transform.SetParent(mulherTransform);
     }
@@ -181,6 +181,6 @@ public class CutscenePerseguicao : MonoBehaviour
             yield return new WaitForSeconds(tempoPiscar);
         }
         foreach (var luz in luzesPiscar)
-            luz.enabled = true; // volta ao normal
+            luz.enabled = true; 
     }
 }

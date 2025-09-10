@@ -7,7 +7,7 @@ public class InteracaoGavetaCutscene : MonoBehaviour
 
     public bool gavetaFoiAberta = false;
 
-    private Vector3 posicaoFechada; // salva a posição inicial
+    private Vector3 posicaoFechada; 
 
 
     [Header("Configuração de Som")]
@@ -54,7 +54,7 @@ public class InteracaoGavetaCutscene : MonoBehaviour
 
     public GameObject painel;
 
-    //public GameObject painelCutscene;
+    public List <GameObject> canvasTexto = new List<GameObject>();
 
     private bool jogadorPerto = false;
     private bool emCutscene = false;
@@ -89,7 +89,11 @@ public class InteracaoGavetaCutscene : MonoBehaviour
     {
         if (jogadorPerto && Input.GetKeyDown(KeyCode.E) && !emCutscene)
         {
-            painel.SetActive(false); 
+            painel.SetActive(false);
+            foreach (GameObject textos in canvasTexto)
+            {
+                textos.SetActive(false);
+            }
             StartCoroutine(ExecutarCutscene());
             foreach (GameObject objetos in objetosCutscene) {
                 objetos.SetActive(true);
