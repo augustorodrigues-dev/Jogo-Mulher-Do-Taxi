@@ -4,35 +4,31 @@ public class BotaoNaTela : MonoBehaviour
 {
     public GameObject painelInstrução;
     public Collider localColisao;
+    private int contatos;
 
-    bool estaNaArea;
+    private void Start() => Mostrar(false);
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player"))
-            estaNaArea = true;
+        if (other.CompareTag("Player") && ++contatos == 1) Mostrar(true);
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.CompareTag("Player"))
-            estaNaArea = false;
-    }
-    void Start()
-    {
-        estaNaArea = false;
+        if (!other.CompareTag("Player")) return;
+        contatos = Mathf.Max(0, contatos - 1);
+        if (contatos == 0) Mostrar(false);
     }
 
-
-    void Update()
+    private void OnDisable()
     {
-        if (estaNaArea)
-        {
-            painelInstrução.SetActive(true);
-        }
-        else
-        {
-            painelInstrução.SetActive(false);   
-        }
+        contatos = 0;
+        Mostrar(false);
+    }
+
+    private void Mostrar(bool visivel)
+    {
+        if (painelInstrução != null && painelInstrução.activeSelf != visivel)
+            painelInstrução.SetActive(visivel);
     }
 }

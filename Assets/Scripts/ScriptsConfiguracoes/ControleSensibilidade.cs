@@ -6,7 +6,7 @@ public class ControleSensibilidade : MonoBehaviour
     public Slider BarraSensibilidade;
     void Start()
     {
-        if (PlayerPrefs.HasKey("sensibilidadeGlobal"))
+        if (!PlayerPrefs.HasKey("sensibilidadeGlobal"))
         {
             PlayerPrefs.SetFloat("sensibilidadeGlobal", 1f);
             load();
@@ -34,5 +34,5 @@ public class ControleSensibilidade : MonoBehaviour
         }
         BarraSensibilidade.value = PlayerPrefs.GetFloat("sensibilidadeGlobal");
     }
-    
+
 }

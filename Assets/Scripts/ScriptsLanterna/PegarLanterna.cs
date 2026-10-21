@@ -12,51 +12,48 @@ public class PegarLanterna : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        
+
         if (other.CompareTag("Player"))
         {
             podePegar = true;
-            lanternaNoChao = this.gameObject; 
-            
+            lanternaNoChao = this.gameObject;
+
         }
     }
 
-    
     private void OnTriggerExit(Collider other)
     {
-        
+
         if (other.CompareTag("Player"))
         {
             podePegar = false;
-            
-            
+
         }
     }
 
-    
     private void Update()
     {
-        
+        if (GerenciadorDePause.estaPausado) return;
+
         if (podePegar && Input.GetKeyDown(teclaParaPegar))
         {
-            
+
             Pegar();
         }
     }
 
     private void Pegar()
     {
-        
+
         if (lanternaNaMao != null)
         {
             lanternaNaMao.SetActive(true);
         }
 
-        
         if (lanternaNoChao != null)
         {
             Destroy(lanternaNoChao);
         }
-        
+
     }
 }

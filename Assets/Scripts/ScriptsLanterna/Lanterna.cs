@@ -6,13 +6,13 @@ public class Lanterna : MonoBehaviour
 {
     public GameObject ON;
     public GameObject OFF;
-    
-    public AudioSource SomLanterna; 
+
+    public AudioSource SomLanterna;
     private bool isON;
 
     void Start()
     {
-        
+
         ON.SetActive(false);
         OFF.SetActive(true);
         isON = false;
@@ -20,19 +20,18 @@ public class Lanterna : MonoBehaviour
 
     void Update()
     {
-        
+        if (GerenciadorDePause.estaPausado) return;
+
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
-            
-            isON = !isON; 
-            
-            
+
+            isON = !isON;
+
             if (SomLanterna != null)
             {
                 SomLanterna.Play();
             }
 
-            
             ON.SetActive(isON);
             OFF.SetActive(!isON);
         }

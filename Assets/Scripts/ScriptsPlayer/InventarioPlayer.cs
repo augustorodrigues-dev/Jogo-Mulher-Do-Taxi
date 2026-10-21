@@ -3,24 +3,19 @@ using UnityEngine;
 public class InventarioPlayer : MonoBehaviour
 {
     public bool temChave = false;
-    public bool estaAgachado = false; 
+    public bool estaAgachado = false;
+    public KeyCode teclaAgachar = KeyCode.LeftControl;
+    private MovimentoPlayer movimento;
 
-    public KeyCode teclaAgachar = KeyCode.LeftControl; 
-
-    
-    void Start()
+    private void Awake()
     {
-        
+        movimento = GetComponent<MovimentoPlayer>();
     }
 
-    void Update()
-{
-    
-    if (Input.GetKeyDown(teclaAgachar))
+    private void Update()
     {
-        
-        estaAgachado = !estaAgachado;
-
+        // Com controlador, somente ele altera a postura e publica o estado.
+        if (movimento != null || GerenciadorDePause.estaPausado) return;
+        if (Input.GetKeyDown(teclaAgachar)) estaAgachado = !estaAgachado;
     }
-}
 }

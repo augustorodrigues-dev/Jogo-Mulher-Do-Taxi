@@ -5,8 +5,7 @@ public class PassosPlayer : MonoBehaviour
     [SerializeField] private AudioSource somPassosSource;
     [SerializeField] private CharacterController characterController;
 
-    
-    [Header("Sons de Passos")] 
+    [Header("Sons de Passos")]
     [SerializeField] private AudioClip somAndando;
     [SerializeField] private AudioClip somCorrendo;
 
@@ -20,43 +19,42 @@ public class PassosPlayer : MonoBehaviour
 
     [SerializeField] private float pitchAgachado = 1.0f;
 
-    void Update()
+    private MovimentoPlayer movimento;
+    public bool Configurado => somPassosSource != null && characterController != null;
+    public bool UsaAudio(AudioSource source) => somPassosSource == source;
+
+    private void Awake()
     {
-        
-        if (characterController.isGrounded && characterController.velocity.magnitude > 0.1f)
-        {
-            bool estaCorrendo = Input.GetKey(KeyCode.LeftShift);
-            bool estaAgachado = Input.GetKey(KeyCode.LeftControl);
+        if (characterController == null) characterController = GetComponent<CharacterController>();
+        if (characterController != null) movimento = characterController.GetComponent<MovimentoPlayer>();
+    }
 
-            
-            if (estaCorrendo)
-            {
-                
-                somPassosSource.clip = somCorrendo;
-                somPassosSource.pitch = pitchCorrendo;
-            }
-            else if (estaAgachado)
-            {
-                
-                somPassosSource.clip = somAgachado;
-                somPassosSource.pitch = pitchAgachado;
-            }
-            else
-            {
-                somPassosSource.clip = somAndando;
-                somPassosSource.pitch = pitchAndando;
-            }
+    private void OnDisable() => Parar();
 
-            
-            if (!somPassosSource.isPlaying)
-            {
-                somPassosSource.Play();
-            }
-        }
-        else
+    private void Parar()
+    {
+        if (somPassosSource != null && somPassosSource.isPlaying) somPassosSource.Stop();
+    }
+
+    // Depois do movimento, para consultar a velocidade do frame atual.
+    private void LateUpdate()
+    {
+        if (!Configurado) return;
+        if (GerenciadorDePause.estaPausado ||
+            (movimento != null && (!movimento.isActiveAndEnabled || movimento.desativarPassos)) ||
+            !characterController.isGrounded || characterController.velocity.sqrMagnitude <= 0.01f)
         {
-            
-            somPassosSource.Stop();
+            Parar();
+            return;
         }
+
+        bool agachado = movimento != null ? movimento.EstaAgachado : Input.GetKey(KeyCode.LeftControl);
+        bool correndo = !agachado && Input.GetKey(KeyCode.LeftShift);
+        AudioClip clip = agachado ? somAgachado : correndo ? somCorrendo : somAndando;
+        float pitch = agachado ? pitchAgachado : correndo ? pitchCorrendo : pitchAndando;
+        if (clip == null) { Parar(); return; }
+        if (somPassosSource.clip != clip) somPassosSource.clip = clip;
+        if (somPassosSource.pitch != pitch) somPassosSource.pitch = pitch;
+        if (!somPassosSource.isPlaying) somPassosSource.Play();
     }
 }

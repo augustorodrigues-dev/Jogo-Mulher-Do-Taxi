@@ -1,14 +1,14 @@
 using UnityEngine;
 using System.Collections;
-using System.Collections.Generic; 
+using System.Collections.Generic;
 
 public class InteracaoGavetaCutscene : MonoBehaviour
 {
 
     public bool gavetaFoiAberta = false;
 
-    private Vector3 posicaoFechada; 
-
+    private readonly ControleScriptsCutscene controleScripts = new ControleScriptsCutscene();
+    private static readonly WaitForSeconds pausaDramatica = new WaitForSeconds(4f);
 
     [Header("Configuração de Som")]
     [Tooltip("O componente AudioSource que vai tocar o som.")]
@@ -23,25 +23,23 @@ public class InteracaoGavetaCutscene : MonoBehaviour
     [Header("Configuração da Cutscene")]
     [Tooltip("Ponto exato para onde o jogador deve se mover.")]
     public Transform pontoAlvoPlayer;
-    
+
     [Tooltip("Ponto exato para onde a câmera deve olhar.")]
     public Transform lookAtAlvo;
 
-    
     [Tooltip("Arraste aqui TODOS os scripts do jogador que devem ser desativados durante a cutscene.")]
-    public List<MonoBehaviour> scriptsParaDesativar; 
+    public List<MonoBehaviour> scriptsParaDesativar;
 
     [Tooltip("A câmera principal do jogador.")]
     public Camera playerCamera;
 
-    
     [Tooltip("Ponto secundário para onde a câmera deve olhar após a ação principal.")]
     public Transform lookAtAlvoSecundario;
 
     [Header("Configuração da Gaveta")]
     [Tooltip("O objeto da gaveta que será movido.")]
     public Transform gavetaTransform;
-    
+
     [Tooltip("A distância que a gaveta vai abrir.")]
     public float distanciaParaAbrir = 0.33f;
 
@@ -62,7 +60,6 @@ public class InteracaoGavetaCutscene : MonoBehaviour
 
     public GameObject mulherDoTaxi;
 
-
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
@@ -76,53 +73,41 @@ public class InteracaoGavetaCutscene : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             jogadorPerto = false;
-            playerObject = null;
+            if (!emCutscene) playerObject = null;
         }
-    }
-
-    void Start()
-    {
-        posicaoFechada = gavetaTransform.position; // considera a posição inicial como fechada
     }
 
     void Update()
     {
-        if (jogadorPerto && Input.GetKeyDown(KeyCode.E) && !emCutscene)
+        if (pontoAlvoPlayer == null || lookAtAlvo == null || playerCamera == null || gavetaTransform == null)
+            return;
+        if (!GerenciadorDePause.estaPausado && jogadorPerto && !gavetaFoiAberta &&
+            !emCutscene && playerObject != null && Input.GetKeyDown(KeyCode.E))
         {
-            painel.SetActive(false);
+            if (painel != null) painel.SetActive(false);
             foreach (GameObject textos in canvasTexto)
             {
-                textos.SetActive(false);
+                if (textos != null) textos.SetActive(false);
             }
             StartCoroutine(ExecutarCutscene());
             foreach (GameObject objetos in objetosCutscene) {
-                objetos.SetActive(true);
+                if (objetos != null) objetos.SetActive(true);
             }
             // painelCutscene.SetActive(true);
         }
     }
 
-
-
     private IEnumerator ExecutarCutscene()
     {
         emCutscene = true;
 
+        controleScripts.Desativar(scriptsParaDesativar, this);
 
-        foreach (var script in scriptsParaDesativar)
-        {
-            script.enabled = false;
-        }
-
-
-        while (Vector3.Distance(playerObject.transform.position, pontoAlvoPlayer.position) > 0.01f)
+        while ((playerObject.transform.position - pontoAlvoPlayer.position).sqrMagnitude > 0.0001f)
         {
             playerObject.transform.position = Vector3.MoveTowards(playerObject.transform.position, pontoAlvoPlayer.position, velocidadeMovimento * Time.deltaTime);
             yield return null;
         }
-
-
-
 
         Quaternion targetRotationGaveta = Quaternion.LookRotation(lookAtAlvo.position - playerCamera.transform.position);
         while (Quaternion.Angle(playerCamera.transform.rotation, targetRotationGaveta) > 0.1f)
@@ -131,7 +116,6 @@ public class InteracaoGavetaCutscene : MonoBehaviour
             yield return null;
         }
 
-
         if (somGavetaSource != null && somGaveta != null)
         {
             somGavetaSource.clip = somGaveta;
@@ -139,7 +123,6 @@ public class InteracaoGavetaCutscene : MonoBehaviour
             somGavetaSource.volume = 0.5f; // ajusta o volume aqui
             somGavetaSource.Play();
         }
-
 
         Vector3 posicaoFechada = gavetaTransform.position;
         Vector3 posicaoAberta = posicaoFechada + gavetaTransform.right * distanciaParaAbrir;
@@ -162,7 +145,7 @@ public class InteracaoGavetaCutscene : MonoBehaviour
         }
 
         // A "pausa dramática" que você mencionou
-        yield return new WaitForSeconds(4f);
+        yield return pausaDramatica;
 
         if (lookAtAlvoSecundario != null)
         {
@@ -174,33 +157,26 @@ public class InteracaoGavetaCutscene : MonoBehaviour
             }
         }
 
-        MovimentoPlayer playerScript = playerObject.GetComponent<MovimentoPlayer>();
-
-        if (playerScript != null)
-        {
-            Quaternion finalWorldRotation = playerCamera.transform.rotation;
-            playerObject.transform.rotation = Quaternion.Euler(0, finalWorldRotation.eulerAngles.y, 0);
-
-            float finalRotationX = finalWorldRotation.eulerAngles.x;
-            if (finalRotationX > 180)
-            {
-
-                finalRotationX -= 360;
-            }
-
-            playerScript.rotationX = finalRotationX;
-        }
-
-        foreach (var script in scriptsParaDesativar)
-        {
-            script.enabled = true;
-        }
+        ControleScriptsCutscene.SincronizarCamera(playerObject, playerCamera);
+        controleScripts.Restaurar();
         foreach (GameObject objetos in objetosCutscene)
         {
-            objetos.SetActive(false);
+            if (objetos != null) objetos.SetActive(false);
         }
-        mulherDoTaxi.SetActive(true);
+        if (mulherDoTaxi != null) mulherDoTaxi.SetActive(true);
         emCutscene = false;
         gavetaFoiAberta = true;
+    }
+    private void OnDisable()
+    {
+        if (!emCutscene) return;
+        StopAllCoroutines();
+        ControleScriptsCutscene.SincronizarCamera(playerObject, playerCamera);
+        controleScripts.Restaurar();
+        foreach (GameObject objeto in objetosCutscene)
+            if (objeto != null) objeto.SetActive(false);
+        emCutscene = false;
+        jogadorPerto = false;
+        playerObject = null;
     }
 }

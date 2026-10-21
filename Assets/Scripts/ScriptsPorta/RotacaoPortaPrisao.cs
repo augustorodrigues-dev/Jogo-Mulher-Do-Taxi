@@ -3,28 +3,30 @@ using UnityEngine;
 
 public class RotacaoPortaPrisao : MonoBehaviour
 {
-    
+
     public float anguloAbertura = 90.0f;
     public float velocidadeAbertura = 2.0f;
-    public KeyCode teclaParaAbrir = KeyCode.E; 
+    public KeyCode teclaParaAbrir = KeyCode.E;
 
     private bool portaAberindo = false;
     private bool jogadorNaArea = false;
     private Quaternion rotacaoInicial;
     private Quaternion rotacaoFinal;
-    private InventarioPlayer inventarioPlayer; 
+    private InventarioPlayer inventarioPlayer;
 
     void Start()
     {
-        
+
         rotacaoInicial = transform.rotation;
-        
+
         rotacaoFinal = rotacaoInicial * Quaternion.Euler(0, anguloAbertura, 0);
     }
 
     void Update()
     {
-        
+
+        if (GerenciadorDePause.estaPausado) return;
+
         if (jogadorNaArea && Input.GetKeyDown(teclaParaAbrir))
         {
             if (inventarioPlayer != null && inventarioPlayer.temChave)
@@ -38,33 +40,35 @@ public class RotacaoPortaPrisao : MonoBehaviour
             }
         }
 
-        
         if (portaAberindo)
         {
             transform.rotation = Quaternion.Slerp(transform.rotation, rotacaoFinal, Time.deltaTime * velocidadeAbertura);
+            if (Quaternion.Angle(transform.rotation, rotacaoFinal) <= 0.1f)
+            {
+                transform.rotation = rotacaoFinal;
+                portaAberindo = false;
+            }
         }
     }
 
-    
     private void OnTriggerEnter(Collider other)
     {
-        
+
         if (other.CompareTag("Player"))
         {
             jogadorNaArea = true;
-            
-            inventarioPlayer = other.GetComponent<InventarioPlayer>();
+
+            inventarioPlayer = other.GetComponentInParent<InventarioPlayer>();
             Debug.Log("Jogador entrou na área da porta.");
         }
     }
 
-    
     private void OnTriggerExit(Collider other)
     {
         if (other.CompareTag("Player"))
         {
             jogadorNaArea = false;
-            inventarioPlayer = null; 
+            inventarioPlayer = null;
             Debug.Log("Jogador saiu da área da porta.");
         }
     }

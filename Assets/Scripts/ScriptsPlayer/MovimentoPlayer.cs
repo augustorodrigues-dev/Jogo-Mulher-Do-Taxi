@@ -1,14 +1,12 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
-public class MovimentoPlayer : MonoBehaviour 
+public class MovimentoPlayer : MonoBehaviour
 {
     public bool desativarPassos = false;
     [Header("Referências")]
     public Camera playerCamera;
-    [SerializeField] private AudioSource somPassosSource; 
+    [SerializeField] private AudioSource somPassosSource;
 
     [Header("Configurações de Movimento")]
     public float walkSpeed = 6f;
@@ -25,143 +23,107 @@ public class MovimentoPlayer : MonoBehaviour
     public float crouchHeight = 1f;
     public float crouchSpeed = 3f;
 
-    [Header("Sons de Passos")] 
+    [Header("Sons de Passos")]
     [SerializeField] private AudioClip somAndando;
     [SerializeField] private AudioClip somCorrendo;
     [SerializeField] private AudioClip somAgachado;
 
     [Header("Configurações de Ritmo dos Passos")]
     [SerializeField] private float pitchAndando = 1.0f;
-    [SerializeField] private float pitchCorrendo = 1.5f; 
-    [SerializeField] private float pitchAgachado = 0.8f; 
+    [SerializeField] private float pitchCorrendo = 1.5f;
+    [SerializeField] private float pitchAgachado = 0.8f;
 
-    
-    private Vector3 moveDirection = Vector3.zero;
-    public float rotationX = 0;
+    private Vector3 moveDirection;
+    public float rotationX;
     private CharacterController characterController;
-    private bool canMove = true;
-    private float originalWalkSpeed; 
-    private float originalRunSpeed; 
+    private InventarioPlayer inventario;
+    private PassosPlayer passosSeparados;
+    private bool isCrouching;
+    public bool EstaAgachado => isCrouching;
 
-    private bool isCrouching = false; 
-
-    void Start()
+    private void Awake()
     {
         characterController = GetComponent<CharacterController>();
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
-
-        
-        originalWalkSpeed = walkSpeed;
-        originalRunSpeed = runSpeed;
+        inventario = GetComponent<InventarioPlayer>();
+        passosSeparados = GetComponent<PassosPlayer>();
+        isCrouching = inventario != null && inventario.estaAgachado;
     }
 
-    void Update()
+    private void Start()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+    }
+
+    private void OnDisable() => PararPassos();
+
+    private void PararPassos()
+    {
+        if (somPassosSource != null && somPassosSource.isPlaying)
+            somPassosSource.Stop();
+    }
+
+    private void Update()
     {
         if (GerenciadorDePause.estaPausado)
         {
-            somPassosSource.Stop(); 
+            PararPassos();
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.LeftControl))
-    {
-        
-        isCrouching = !isCrouching;
-    }
-        
-        
-        Vector3 forward = transform.TransformDirection(Vector3.forward);
-        Vector3 right = transform.TransformDirection(Vector3.right);
-
-        bool isRunning = Input.GetKey(KeyCode.LeftShift);
-        
-        if (isCrouching && canMove)
+        KeyCode teclaAgachar = inventario != null ? inventario.teclaAgachar : KeyCode.LeftControl;
+        if (Input.GetKeyDown(teclaAgachar))
         {
-            characterController.height = crouchHeight;
-            walkSpeed = crouchSpeed;
-            runSpeed = crouchSpeed;
-        }
-        else
-        {
-            characterController.height = defaultHeight;
-            walkSpeed = originalWalkSpeed;
-            runSpeed = originalRunSpeed;
+            isCrouching = !isCrouching;
+            if (inventario != null) inventario.estaAgachado = isCrouching;
         }
 
-        float curSpeedX = canMove ? (isRunning ? runSpeed : walkSpeed) * Input.GetAxis("Vertical") : 0;
-        float curSpeedY = canMove ? (isRunning ? runSpeed : walkSpeed) * Input.GetAxis("Horizontal") : 0;
-        float movementDirectionY = moveDirection.y;
-        moveDirection = (forward * curSpeedX) + (right * curSpeedY);
+        float altura = isCrouching ? crouchHeight : defaultHeight;
+        if (characterController.height != altura) characterController.height = altura;
 
-        
-        if (Input.GetButton("Jump") && canMove && characterController.isGrounded)
-        {
-            moveDirection.y = jumpPower;
-        }
-        else
-        {
-            moveDirection.y = movementDirectionY;
-        }
+        Vector2 input = Vector2.ClampMagnitude(new Vector2(
+            Input.GetAxis("Horizontal"), Input.GetAxis("Vertical")), 1f);
+        bool isRunning = !isCrouching && Input.GetKey(KeyCode.LeftShift);
+        float speed = isCrouching ? crouchSpeed : isRunning ? runSpeed : walkSpeed;
+        float velocidadeVertical = moveDirection.y;
+        moveDirection = (transform.forward * input.y + transform.right * input.x) * speed;
 
-        
-        if (!characterController.isGrounded)
-        {
-            moveDirection.y -= gravity * Time.deltaTime;
-        }
-
-        
+        bool noChao = characterController.isGrounded;
+        moveDirection.y = noChao && Input.GetButton("Jump") ? jumpPower : velocidadeVertical;
+        if (!noChao) moveDirection.y -= gravity * Time.deltaTime;
         characterController.Move(moveDirection * Time.deltaTime);
 
-        
-        if (canMove)
-        {
-            rotationX += -Input.GetAxis("Mouse Y") * lookSpeed;
-            rotationX = Mathf.Clamp(rotationX, -lookXLimit, lookXLimit);
-            playerCamera.transform.localRotation = Quaternion.Euler(rotationX, 0, 0);
-            transform.rotation *= Quaternion.Euler(0, Input.GetAxis("Mouse X") * lookSpeed, 0);
-        }
+        rotationX = Mathf.Clamp(rotationX - Input.GetAxis("Mouse Y") * lookSpeed, -lookXLimit, lookXLimit);
+        if (playerCamera != null)
+            playerCamera.transform.localRotation = Quaternion.Euler(rotationX, 0f, 0f);
+        transform.rotation *= Quaternion.Euler(0f, Input.GetAxis("Mouse X") * lookSpeed, 0f);
 
-        
-        HandlePassos(isRunning, isCrouching);
+        // Mantém os dois componentes compatíveis com cenas existentes, com um único dono do áudio.
+        if (passosSeparados != null && passosSeparados.isActiveAndEnabled && passosSeparados.Configurado)
+        {
+            if (!passosSeparados.UsaAudio(somPassosSource)) PararPassos();
+        }
+        else
+        {
+            HandlePassos(isRunning, isCrouching, input.sqrMagnitude > 0f);
+        }
     }
 
-    
-    private void HandlePassos(bool running, bool crouching)
-{
-    if (desativarPassos)
+    private void HandlePassos(bool running, bool crouching, bool temInput)
     {
-        somPassosSource.Stop();
-        return;
-    }
-
-    if (characterController.isGrounded && characterController.velocity.magnitude > 0.2f && (Input.GetAxis("Vertical") != 0 || Input.GetAxis("Horizontal") != 0))
-    {
-        AudioClip clipAtual = somAndando;
-        float pitchAtual = pitchAndando;
-
-        if (running && !crouching)
+        if (somPassosSource == null) return;
+        if (desativarPassos || !temInput || !characterController.isGrounded ||
+            characterController.velocity.sqrMagnitude <= 0.04f)
         {
-            clipAtual = somCorrendo;
-            pitchAtual = pitchCorrendo;
-        }
-        else if (crouching)
-        {
-            clipAtual = somAgachado;
-            pitchAtual = pitchAgachado;
+            PararPassos();
+            return;
         }
 
-        if (somPassosSource.clip != clipAtual || !somPassosSource.isPlaying)
-        {
-            somPassosSource.clip = clipAtual;
-            somPassosSource.pitch = pitchAtual;
-            somPassosSource.Play();
-        }
+        AudioClip clip = crouching ? somAgachado : running ? somCorrendo : somAndando;
+        float pitch = crouching ? pitchAgachado : running ? pitchCorrendo : pitchAndando;
+        if (clip == null) { PararPassos(); return; }
+        if (somPassosSource.clip != clip) somPassosSource.clip = clip;
+        if (somPassosSource.pitch != pitch) somPassosSource.pitch = pitch;
+        if (!somPassosSource.isPlaying) somPassosSource.Play();
     }
-    else
-    {
-        somPassosSource.Stop();
-    }
-}
-
 }
