@@ -35,7 +35,7 @@ public class RotacaoPorta : MonoBehaviour
     {
         if (GerenciadorDePause.estaPausado) return;
 
-        if (podeAbrir && Input.GetKeyDown(KeyCode.E))
+        if (podeAbrir && EntradaJogador.InteragirPressionado)
         {
             isOpen = !isOpen;
             emMovimento = true;

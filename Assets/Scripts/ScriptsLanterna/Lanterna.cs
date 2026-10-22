@@ -22,7 +22,7 @@ public class Lanterna : MonoBehaviour
     {
         if (GerenciadorDePause.estaPausado) return;
 
-        if (Input.GetKeyDown(KeyCode.Mouse0))
+        if (EntradaJogador.LanternaPressionada)
         {
 
             isON = !isON;

@@ -71,8 +71,7 @@ public class MovimentoPlayer : MonoBehaviour
             return;
         }
 
-        KeyCode teclaAgachar = inventario != null ? inventario.teclaAgachar : KeyCode.LeftControl;
-        if (Input.GetKeyDown(teclaAgachar))
+        if (EntradaJogador.AgacharPressionado)
         {
             isCrouching = !isCrouching;
             if (inventario != null) inventario.estaAgachado = isCrouching;
@@ -81,22 +80,22 @@ public class MovimentoPlayer : MonoBehaviour
         float altura = isCrouching ? crouchHeight : defaultHeight;
         if (characterController.height != altura) characterController.height = altura;
 
-        Vector2 input = Vector2.ClampMagnitude(new Vector2(
-            Input.GetAxis("Horizontal"), Input.GetAxis("Vertical")), 1f);
-        bool isRunning = !isCrouching && Input.GetKey(KeyCode.LeftShift);
+        Vector2 input = EntradaJogador.Movimento;
+        bool isRunning = !isCrouching && EntradaJogador.CorrerSegurado;
         float speed = isCrouching ? crouchSpeed : isRunning ? runSpeed : walkSpeed;
         float velocidadeVertical = moveDirection.y;
         moveDirection = (transform.forward * input.y + transform.right * input.x) * speed;
 
         bool noChao = characterController.isGrounded;
-        moveDirection.y = noChao && Input.GetButton("Jump") ? jumpPower : velocidadeVertical;
+        moveDirection.y = noChao && EntradaJogador.PularPressionado ? jumpPower : velocidadeVertical;
         if (!noChao) moveDirection.y -= gravity * Time.deltaTime;
         characterController.Move(moveDirection * Time.deltaTime);
 
-        rotationX = Mathf.Clamp(rotationX - Input.GetAxis("Mouse Y") * lookSpeed, -lookXLimit, lookXLimit);
+        Vector2 olhar = EntradaJogador.Olhar;
+        rotationX = Mathf.Clamp(rotationX - olhar.y * lookSpeed, -lookXLimit, lookXLimit);
         if (playerCamera != null)
             playerCamera.transform.localRotation = Quaternion.Euler(rotationX, 0f, 0f);
-        transform.rotation *= Quaternion.Euler(0f, Input.GetAxis("Mouse X") * lookSpeed, 0f);
+        transform.rotation *= Quaternion.Euler(0f, olhar.x * lookSpeed, 0f);
 
         // Mantém os dois componentes compatíveis com cenas existentes, com um único dono do áudio.
         if (passosSeparados != null && passosSeparados.isActiveAndEnabled && passosSeparados.Configurado)

@@ -4,7 +4,6 @@ public class PegarLanterna : MonoBehaviour
 {
     public GameObject lanternaNaMao;
 
-    public KeyCode teclaParaPegar = KeyCode.E;
 
     private bool podePegar = false;
 
@@ -35,7 +34,7 @@ public class PegarLanterna : MonoBehaviour
     {
         if (GerenciadorDePause.estaPausado) return;
 
-        if (podePegar && Input.GetKeyDown(teclaParaPegar))
+        if (podePegar && EntradaJogador.InteragirPressionado)
         {
 
             Pegar();

@@ -3,7 +3,6 @@ using UnityEngine;
 
 public class Chave : MonoBehaviour
 {
-    public KeyCode teclaParaPegar = KeyCode.E;
     private readonly HashSet<Collider> contatos = new HashSet<Collider>();
     private InventarioPlayer player;
     private MovimentoPlayer movimento;
@@ -38,7 +37,7 @@ public class Chave : MonoBehaviour
         if (coletada || GerenciadorDePause.estaPausado || player == null) return;
         bool agachado = movimento != null ? movimento.EstaAgachado : player.estaAgachado;
         if ((movimento != null && !movimento.isActiveAndEnabled) || !agachado ||
-            !Input.GetKeyDown(teclaParaPegar)) return;
+            !EntradaJogador.InteragirPressionado) return;
         coletada = true;
         player.temChave = true;
         Destroy(gameObject);

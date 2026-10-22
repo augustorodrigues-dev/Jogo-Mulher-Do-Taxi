@@ -48,8 +48,8 @@ public class PassosPlayer : MonoBehaviour
             return;
         }
 
-        bool agachado = movimento != null ? movimento.EstaAgachado : Input.GetKey(KeyCode.LeftControl);
-        bool correndo = !agachado && Input.GetKey(KeyCode.LeftShift);
+        bool agachado = movimento != null ? movimento.EstaAgachado : EntradaJogador.AgacharSegurado;
+        bool correndo = !agachado && EntradaJogador.CorrerSegurado;
         AudioClip clip = agachado ? somAgachado : correndo ? somCorrendo : somAndando;
         float pitch = agachado ? pitchAgachado : correndo ? pitchCorrendo : pitchAndando;
         if (clip == null) { Parar(); return; }

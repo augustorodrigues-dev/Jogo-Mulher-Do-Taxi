@@ -19,7 +19,7 @@ public class GerenciadorDePause : MonoBehaviour
     void Update()
     {
 
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (EntradaJogador.PausaPressionada)
         {
             if (estaPausado)
             {

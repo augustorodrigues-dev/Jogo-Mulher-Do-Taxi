@@ -6,7 +6,6 @@ public class RotacaoPortaPrisao : MonoBehaviour
 
     public float anguloAbertura = 90.0f;
     public float velocidadeAbertura = 2.0f;
-    public KeyCode teclaParaAbrir = KeyCode.E;
 
     private bool portaAberindo = false;
     private bool jogadorNaArea = false;
@@ -27,7 +26,7 @@ public class RotacaoPortaPrisao : MonoBehaviour
 
         if (GerenciadorDePause.estaPausado) return;
 
-        if (jogadorNaArea && Input.GetKeyDown(teclaParaAbrir))
+        if (jogadorNaArea && EntradaJogador.InteragirPressionado)
         {
             if (inventarioPlayer != null && inventarioPlayer.temChave)
             {

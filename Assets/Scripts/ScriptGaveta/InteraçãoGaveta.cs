@@ -82,7 +82,7 @@ public class InteracaoGavetaCutscene : MonoBehaviour
         if (pontoAlvoPlayer == null || lookAtAlvo == null || playerCamera == null || gavetaTransform == null)
             return;
         if (!GerenciadorDePause.estaPausado && jogadorPerto && !gavetaFoiAberta &&
-            !emCutscene && playerObject != null && Input.GetKeyDown(KeyCode.E))
+            !emCutscene && playerObject != null && EntradaJogador.InteragirPressionado)
         {
             if (painel != null) painel.SetActive(false);
             foreach (GameObject textos in canvasTexto)

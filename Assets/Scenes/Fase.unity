@@ -11013,7 +11013,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PegarLanterna
   lanternaNaMao: {fileID: 521230883}
-  teclaParaPegar: 101
 --- !u!65 &285453113
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -17164,7 +17163,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 72d2f40d33e677d4db0f2f4f82a8d9f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Chave
-  teclaParaPegar: 101
 --- !u!65 &466587585
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -58538,7 +58536,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RotacaoPortaPrisao
   anguloAbertura: 90
   velocidadeAbertura: 2
-  teclaParaAbrir: 101
 --- !u!65 &1600871007
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -80673,7 +80670,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InventarioPlayer
   temChave: 0
   estaAgachado: 0
-  teclaAgachar: 306
 --- !u!1 &2119392641
 GameObject:
   m_ObjectHideFlags: 0
